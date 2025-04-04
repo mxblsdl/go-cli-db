@@ -19,7 +19,7 @@ func main() {
 
 	// Define command-line flags
 	configPath := flag.String("config", "config.yaml", "../config.yaml")
-	command := flag.String("command", "list", "Command to execute (list, tables)")
+	command := flag.String("command", "", "Command to execute (schemas, connections)")
 
 	// Parse the flags
 	flag.Parse()

@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"go-cli-db/internal/config"
 	"go-cli-db/internal/database"
 	"os"
 )
@@ -11,24 +12,25 @@ func HandleCommand(command string) {
 	switch command {
 	case "connections":
 		// Call the function to list items from the database
-		cons, err := database.GetActiveConnections()
+		err := database.GetActiveConnections()
 		if err != nil {
-			fmt.Println("Error getting active connections:", err)
+			fmt.Printf("%sError getting active connections:%s %s", config.Red, config.Reset, err)
 			os.Exit(1)
 		}
-		fmt.Println("Active connections in the database:", cons)
 	case "schemas":
-		tables, err := database.GetSchemaNames()
+		err := database.GetSchemaNames()
 		if err != nil {
-			fmt.Println("Error getting schema names:", err)
+			fmt.Printf("%sError getting schema names:%s %s", config.Red, config.Reset, err)
 			os.Exit(1)
 		}
-		fmt.Println("Scehmas in the database:")
-		for _, table := range tables {
-			fmt.Println(table)
+	case "users":
+		err := database.GetUsers()
+		if err != nil {
+			fmt.Printf("%sError getting users:%s %s", config.Red, config.Reset, err)
+			os.Exit(1)
 		}
 	default:
-		fmt.Println("Unknown command:", command)
+		fmt.Printf("%sUnknown command:%s %s", config.Red, config.Reset, command)
 		os.Exit(1)
 	}
 }

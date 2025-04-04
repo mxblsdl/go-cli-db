@@ -2,6 +2,7 @@ package database
 
 import (
 	"fmt"
+	"go-cli-db/internal/config"
 )
 
 // Add this struct at the top of the file
@@ -10,7 +11,7 @@ type Connection struct {
 	Count    int
 }
 
-func GetSchemaNames() ([]string, error) {
+func GetSchemaNames() error {
 	query := `
 		select
 			distinct
@@ -25,7 +26,7 @@ func GetSchemaNames() ([]string, error) {
 
 	rows, err := db.Query(query)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	defer rows.Close()
 
@@ -33,19 +34,25 @@ func GetSchemaNames() ([]string, error) {
 	for rows.Next() {
 		var tableName string
 		if err := rows.Scan(&tableName); err != nil {
-			return nil, err
+			return err
 		}
 		tables = append(tables, tableName)
 	}
 
 	if err = rows.Err(); err != nil {
-		return nil, err
+		return err
+	}
+	// Print the table
+	fmt.Printf("%sScehmas in the database:\n%s", config.Bold, config.Reset)
+	fmt.Println("===================================")
+	for _, table := range tables {
+		fmt.Printf("%sSchema:%s %s\n", config.Green, config.Reset, table)
 	}
 
-	return tables, nil
+	return nil
 }
 
-func GetActiveConnections() (int, error) {
+func GetActiveConnections() error {
 	query := `
 		select
 			COALESCE(usename, 'none') as username,
@@ -58,7 +65,7 @@ func GetActiveConnections() (int, error) {
 
 	rows, err := db.Query(query)
 	if err != nil {
-		return 0, err
+		return err
 	}
 	defer rows.Close()
 
@@ -67,19 +74,18 @@ func GetActiveConnections() (int, error) {
 		var username string
 		var count int
 		if err := rows.Scan(&username, &count); err != nil {
-			return 0, err
+			return err
 		}
 		connectionsTable = append(connectionsTable, Connection{Username: username, Count: count})
 	}
 
 	if err = rows.Err(); err != nil {
-		return 0, err
+		return err
 	}
 
-	// Print the table (optional, for debugging)
+	// Print the table
 	for _, conn := range connectionsTable {
-		// fmt.Println(row)
-		fmt.Printf("User: %s, Count: %d\n", conn.Username, conn.Count)
+		fmt.Printf("%sUser:%s %s, Count: %d\n", config.Green, config.Reset, conn.Username, conn.Count)
 	}
 
 	var totalConnections int
@@ -87,6 +93,43 @@ func GetActiveConnections() (int, error) {
 		totalConnections += row.Count
 
 	}
+	fmt.Printf("%sActive connections in the database:%s %d\n", config.Red, config.Reset, totalConnections)
 
-	return totalConnections, nil
+	return nil
+}
+
+func GetUsers() error {
+	query := `
+		select
+			COALESCE(usename, 'none') as username
+		from
+			pg_user;
+	`
+
+	rows, err := db.Query(query)
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+
+	var users []string
+	for rows.Next() {
+		var username string
+		if err := rows.Scan(&username); err != nil {
+			return err
+		}
+		users = append(users, username)
+	}
+
+	if err = rows.Err(); err != nil {
+		return err
+	}
+	// Print the table
+	fmt.Printf("%sUsers in the database:%s\n", config.Bold, config.Reset)
+	fmt.Println("===================================")
+	for _, user := range users {
+		fmt.Printf("%sUser:%s %s\n", config.Green, config.Reset, user)
+	}
+
+	return nil
 }
