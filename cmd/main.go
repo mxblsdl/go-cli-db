@@ -19,15 +19,19 @@ func main() {
 
 	// Define command-line flags
 	configPath := flag.String("config", "config.yaml", "../config.yaml")
-	command := flag.String("command", "", "Command to execute (schemas, connections)")
 
 	// Parse the flags
 	flag.Parse()
 
-	if len(os.Args) == 1 {
+	// Check if the user provided a command
+	if flag.NArg() == 0 {
 		flag.Usage()
 		os.Exit(0)
 	}
+
+	// Get the command from the command line arguments
+	command := flag.Arg(0)
+	args := flag.Args()[1:]
 
 	// Load configuration
 	cfg, err := config.LoadConfig(*configPath)
@@ -49,5 +53,5 @@ func main() {
 	database.Connect(cfg.GetDatabaseURL())
 
 	// Handle user commands
-	handlers.HandleCommand(*command)
+	handlers.HandleCommand(command, args)
 }

@@ -133,3 +133,41 @@ func GetUsers() error {
 
 	return nil
 }
+
+func GetTableSizes(schema string) error {
+	query := fmt.Sprintf(`
+	SELECT
+		table_name,
+		pg_size_pretty(pg_total_relation_size(table_schema || '.' || table_name)) as total_size
+	FROM information_schema.tables
+	WHERE table_schema = '%s'
+	ORDER BY pg_total_relation_size(table_schema || '.' || table_name) DESC;
+	`, schema)
+
+	rows, err := db.Query(query)
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+
+	var tables []string
+	for rows.Next() {
+		var tableName string
+		var size string
+		if err := rows.Scan(&tableName, &size); err != nil {
+			return err
+		}
+		tables = append(tables, fmt.Sprintf("%s (%s)", tableName, size))
+	}
+
+	if err = rows.Err(); err != nil {
+		return err
+	}
+	fmt.Printf("%sTables in the database:%s\n", config.Bold, config.Reset)
+	fmt.Println("===================================")
+	for _, table := range tables {
+		fmt.Printf("%sTable:%s %s\n", config.Green, config.Reset, table)
+	}
+
+	return nil
+}
