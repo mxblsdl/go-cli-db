@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"log"
 	"os"
 
 	"go-cli-db/internal/config"
@@ -13,7 +12,13 @@ import (
 
 func main() {
 	flag.Usage = func() {
-		log.Println("Usage: go-cli-db A command-line tool to interact with a PostgreSQL database.")
+		fmt.Println("Usage: go-cli-db A command-line tool to interact with a PostgreSQL database.")
+		fmt.Println("\nCommands:")
+		fmt.Println("  schemas                List all schemas in the database")
+		fmt.Println("  connections            Show active database connections")
+		fmt.Println("  size [schema]          List tables sizes in the specified schema")
+		fmt.Println("  users                  List database users")
+		fmt.Println("\nOptions:")
 		flag.PrintDefaults()
 	}
 

@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"go-cli-db/internal/config"
 	"go-cli-db/internal/database"
-	"os"
 )
 
 // HandleCommand processes the user command and interacts with the database.
@@ -15,32 +14,32 @@ func HandleCommand(command string, args []string) {
 		err := database.GetActiveConnections()
 		if err != nil {
 			fmt.Printf("%sError getting active connections:%s %s", config.Red, config.Reset, err)
-			os.Exit(1)
+			return
 		}
 	case "schemas":
 		err := database.GetSchemaNames()
 		if err != nil {
 			fmt.Printf("%sError getting schema names:%s %s", config.Red, config.Reset, err)
-			os.Exit(1)
+			return
 		}
 	case "users":
 		err := database.GetUsers()
 		if err != nil {
 			fmt.Printf("%sError getting users:%s %s", config.Red, config.Reset, err)
-			os.Exit(1)
+			return
 		}
 	case "size":
 		if len(args) < 1 {
 			fmt.Printf("%sError:%s missing schema name argument for 'size' command", config.Red, config.Reset)
-			os.Exit(1)
+			return
 		}
 		err := database.GetTableSizes(args[0])
 		if err != nil {
 			fmt.Printf("%sError getting schema size:%s %s", config.Red, config.Reset, err)
-			os.Exit(1)
+			return
 		}
 	default:
 		fmt.Printf("%sUnknown command:%s %s", config.Red, config.Reset, command)
-		os.Exit(1)
+		return
 	}
 }
