@@ -3,7 +3,7 @@
 set -e
 
 # Configuration
-APP_NAME="go-cli-db"
+APP_NAME="db"
 MAIN_PACKAGE="./cmd"
 VERSION=$(git describe --tags --always --dirty 2>/dev/null || echo "dev")
 BUILD_DIR="./build"

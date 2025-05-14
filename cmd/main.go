@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"path/filepath"
 
 	"go-cli-db/internal/config"
 	"go-cli-db/internal/database"
@@ -23,7 +24,13 @@ func main() {
 	}
 
 	// Define command-line flags
-	configPath := flag.String("config", "config.yaml", "../config.yaml")
+	homeDir, err := os.UserHomeDir()
+	var configPath string
+	if err != nil {
+		configPath = "config.yaml"
+	} else {
+		configPath = filepath.Join(homeDir, "config.yaml")
+	}
 
 	// Parse the flags
 	flag.Parse()
@@ -39,9 +46,9 @@ func main() {
 	args := flag.Args()[1:]
 
 	// Load configuration
-	cfg, err := config.LoadConfig(*configPath)
+	cfg, err := config.LoadConfig(configPath)
 	if err != nil {
-		fmt.Printf("Failed to load config: %v", err)
+		fmt.Printf("Failed to load config: %v\n", err)
 		fmt.Println("A config.yaml file is required in the root directory of the project.")
 		fmt.Println("The structure of the file should be as follows:")
 		fmt.Println("database:")
