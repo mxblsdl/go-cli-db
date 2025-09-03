@@ -3,6 +3,7 @@ package database
 import (
 	"database/sql"
 	"fmt"
+	"go-cli-db/internal/config"
 	"log"
 
 	_ "github.com/lib/pq" // PostgreSQL driver
@@ -22,7 +23,7 @@ func Connect(connStr string) {
 		log.Fatalf("Error pinging the database: %v", err)
 	}
 
-	fmt.Println("Successfully connected to the database!")
+	fmt.Printf("%sSuccessfully connected to the database!%s\n", config.Green, config.Reset)
 }
 
 // Query executes a SQL query and returns the result.
@@ -33,4 +34,3 @@ func Query(query string, args ...interface{}) (*sql.Rows, error) {
 	}
 	return rows, nil
 }
-

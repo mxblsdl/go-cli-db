@@ -134,6 +134,47 @@ func GetUsers() error {
 	return nil
 }
 
+func GetSchemaSizes() error {
+	query := `
+		SELECT
+            nspname AS table_schema,
+            pg_size_pretty(sum(pg_relation_size(pg_class.oid))) AS total_size
+        FROM pg_class
+        JOIN pg_namespace ON pg_namespace.oid = pg_class.relnamespace
+        WHERE nspname NOT IN ('public', 'sde', 'pg_catalog', 'information_schema')
+          AND pg_class.relkind IN ('r', 'm')
+        GROUP BY nspname
+        ORDER BY sum(pg_relation_size(pg_class.oid)) DESC;
+	`
+
+	rows, err := db.Query(query)
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+
+	var schemas []string
+	for rows.Next() {
+		var schema string
+		var size string
+		if err := rows.Scan(&schema, &size); err != nil {
+			return err
+		}
+		schemas = append(schemas, fmt.Sprintf("%s (%s%s%s)", schema, config.Blue, size, config.Reset))
+	}
+
+	if err = rows.Err(); err != nil {
+		return err
+	}
+	fmt.Printf("%sSchemas in the database by size:%s\n", config.Bold, config.Reset)
+	fmt.Println("===================================")
+	for _, schema := range schemas {
+		fmt.Printf("%sSchema:%s %s\n", config.Green, config.Reset, schema)
+	}
+
+	return nil
+}
+
 func GetTableSizes(schema string) error {
 	query := fmt.Sprintf(`
 	SELECT
@@ -157,7 +198,7 @@ func GetTableSizes(schema string) error {
 		if err := rows.Scan(&tableName, &size); err != nil {
 			return err
 		}
-		tables = append(tables, fmt.Sprintf("%s (%s)", tableName, size))
+		tables = append(tables, fmt.Sprintf("%s (%s%s%s)", tableName, config.Blue, size, config.Reset))
 	}
 
 	if err = rows.Err(); err != nil {
