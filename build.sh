@@ -70,9 +70,6 @@ release() {
   # Windows (amd64)
   GOOS=windows GOARCH=amd64 go build -ldflags "-X main.version=$VERSION" -o $RELEASE_DIR/${APP_NAME}-windows-amd64.exe $MAIN_PACKAGE
   
-  # Copy config template to release dir
-  cp $CONFIG_FILE $RELEASE_DIR/ 2>/dev/null || touch $RELEASE_DIR/$CONFIG_FILE
-  
   print_msg "Release builds created in $RELEASE_DIR"
 }
 
